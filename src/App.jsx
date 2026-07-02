@@ -16,10 +16,12 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormLabel from '@mui/material/FormLabel';
 import GameOverModal from './GameOver.jsx'
 import './App.css'
+import LeaderBoard from './LeaderBoard.jsx';
 
 
 function App() 
 {
+  const [name, setName] = useState(""); // This variable is the state that holds the user's name
   const [selectedOption, setSelectedOption] = useState(""); // This variable is the state that hold user selection
   
   const handleAnswerChange = (event) => { // This function is called when the user selects an option
@@ -27,6 +29,18 @@ function App()
     console.log("Selected option:", event.target.value); // Log the selected option to the console
   };
   
+  const [leaderboardData, setLeaderboardData] = useState([]); 
+ const handleSaveScore = (playername, score) => { 
+    const newEntry = { name: playername, score: score };
+    setLeaderboardData((prevData) => [...prevData, newEntry]);
+    
+    // Automatically reset the match data for the next run
+    setScore(0);
+    setQuestionCount(0);
+    setSelectedOption(""); 
+    setName(""); 
+    fetchRandomPokemon();
+  };
   const id = React.useId();
 
   const [questionCount, setQuestionCount] = useState(0) // Variable used to store number of questions asked
@@ -80,7 +94,10 @@ function App()
     fetchRandomPokemon();
     setScore(0);
     setQuestionCount(0);
-    setIsGameOver(false);
+    
+    setSelectedOption(""); 
+    setName(""); 
+    
 
   }
   const endGame = () => { }// Not ready will be used to end the game
@@ -114,7 +131,7 @@ function App()
       
       
       <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'Arial' }}>
-        <h2>Question {questionCount}/10</h2>
+        <h2>Question {questionCount}/5</h2>
       </div>
     </div>
     <Box>
@@ -169,8 +186,10 @@ function App()
         Submit
       </Button>
     </Box>
-    <GameOverModal isOpen={questionCount >= 10} score={score} startNewGame={startNewGame} />
+    <GameOverModal isOpen={questionCount >= 5} score={score} startNewGame={startNewGame} onSaveScore={handleSaveScore} />
+      <LeaderBoard data={leaderboardData} />
 
+      
     </>
   )
 }
