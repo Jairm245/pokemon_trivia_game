@@ -14,45 +14,49 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormLabel from '@mui/material/FormLabel';
+import GameOverModal from './GameOver.jsx'
 import './App.css'
 
 
 function App() 
 {
-  const [selectedOption, setSelectedOption] = useState("");
-    const handleAnswerChange = (event) => {
+  const [selectedOption, setSelectedOption] = useState(""); // This variable is the state that hold user selection
+  
+  const handleAnswerChange = (event) => { // This function is called when the user selects an option
     setSelectedOption(event.target.value);
     console.log("Selected option:", event.target.value); // Log the selected option to the console
   };
   
   const id = React.useId();
 
-  const [count, setCount] = useState(0)
+  const [questionCount, setQuestionCount] = useState(0) // Variable used to store number of questions asked
 
-  const [age, setAge] = useState(1);
+  const [category, setCategory] = useState(1); // variable for dropdown menu;
 
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  const handleChange = (event) => { // This function is used when the user selects a category from the dropdown
+    setCategory(event.target.value);
   };
 
-  const [pokemon, setPokemon] = useState(null);
+  const [pokemon, setPokemon] = useState(null); // This stores the pokemon data from API
 
   
-  // 1. Declare the score state variable, initialized at 0
+  //  score state variable, initialized at 0
   const [score, setScore] = useState(0);
 
-  // 2. Define handler functions to modify the state safely
+  // function to modify the state to add to the score
   const increaseScore = () => {
-    setScore(prevScore => prevScore + 1);
+    setScore(prevScore => prevScore + 10);
   };
 
-  const checkAnswer = (selectedOption) => {
+  const checkAnswer = (selectedOption) => { // function that checks selected option
+    setQuestionCount(prevCount => prevCount + 1); // Increment question count
     if (selectedOption === pokemon.generation) {
       increaseScore();
-      console.log("Correct! Score increased to:", score + 1);
+      console.log("Correct! Score increased to:", score + 10);
     } else {
       console.log("Incorrect. Score remains at:", score);
     }
+    console.log("Question count:", questionCount + 1); // Log the updated question count
   };
 
   const fetchRandomPokemon = async () => {
@@ -65,13 +69,27 @@ function App()
     data.generation = speciesData.generation.name; // Add generation info to the pokemon data
     setPokemon(data);
     console.log(data.generation); // Log the generation name to the console
+  
+      // Check if the user reached 10 questions
+   
+  };
+
+
+
+  const startNewGame = () => { // Not ready will be used to reset the game 
+    fetchRandomPokemon();
+    setScore(0);
+    setQuestionCount(0);
+    setIsGameOver(false);
+
   }
+  const endGame = () => { }// Not ready will be used to end the game
    // Fetch a random Pokémon when the component first loads
   useEffect(() => {
     fetchRandomPokemon();
   }, []);
 
-  useEffect(() => {
+  useEffect(() => { // This helps score actually show up on screen IDK 
   console.log(" The actual UI Score updated to:", score);
 }, [score]);
 
@@ -95,8 +113,8 @@ function App()
       <h2>Current Score: {score}</h2>
       
       
-      <div>
-        
+      <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'Arial' }}>
+        <h2>Question {questionCount}/10</h2>
       </div>
     </div>
     <Box>
@@ -110,7 +128,7 @@ function App()
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={age}
+          value={category}
           label="Category"
           onChange={handleChange}
         >
@@ -142,10 +160,17 @@ function App()
       </RadioGroup>
     </FormControl>
     <Box>
- <Button  variant="contained" onClick={() => checkAnswer(selectedOption)}>
+ <Button  variant="contained" onClick={() => 
+ {
+  checkAnswer(selectedOption)
+  fetchRandomPokemon()
+  setSelectedOption(""); 
+  }}>
         Submit
       </Button>
     </Box>
+    <GameOverModal isOpen={questionCount >= 10} score={score} startNewGame={startNewGame} />
+
     </>
   )
 }
